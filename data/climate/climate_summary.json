@@ -1,0 +1,97 @@
+{
+  "dataset": "Comparative Climate Evidence",
+  "period": "2025",
+  "candidate_count": 3,
+  "candidates": [
+    {
+      "country": "Indonesia",
+      "reference_location": "Jakarta",
+      "period": "2025",
+      "observations": 8760,
+      "latitude": -6.221441,
+      "longitude": 106.856186,
+      "mean_temperature_c": 27.41,
+      "min_temperature_c": 22.6,
+      "max_temperature_c": 36.7,
+      "mean_relative_humidity_pct": 79.46,
+      "source_evidence": {
+        "provider": "Open-Meteo",
+        "dataset": "Historical Weather API",
+        "source_url": "https://archive-api.open-meteo.com/v1/archive",
+        "retrieval_date": "2026-10-01",
+        "evidence_type": "fact"
+      },
+      "calculation": {
+        "type": "descriptive_statistics",
+        "derived_fields": [
+          "mean_temperature_c",
+          "min_temperature_c",
+          "max_temperature_c",
+          "mean_relative_humidity_pct"
+        ],
+        "evidence_type": "calculation"
+      },
+      "limitation": "Reference-location screening evidence; not a proposed data center site."
+    },
+    {
+      "country": "Brazil",
+      "reference_location": "Brasilia",
+      "period": "2025",
+      "observations": 8760,
+      "latitude": -15.782073,
+      "longitude": -47.88678,
+      "mean_temperature_c": 22.34,
+      "min_temperature_c": 12.6,
+      "max_temperature_c": 33.6,
+      "mean_relative_humidity_pct": 62.85,
+      "source_evidence": {
+        "provider": "Open-Meteo",
+        "dataset": "Historical Weather API",
+        "source_url": "https://archive-api.open-meteo.com/v1/archive",
+        "retrieval_date": "2026-10-01",
+        "evidence_type": "fact"
+      },
+      "calculation": {
+        "type": "descriptive_statistics",
+        "derived_fields": [
+          "mean_temperature_c",
+          "min_temperature_c",
+          "max_temperature_c",
+          "mean_relative_humidity_pct"
+        ],
+        "evidence_type": "calculation"
+      },
+      "limitation": "Reference-location screening evidence; not a proposed data center site."
+    },
+    {
+      "country": "Canada",
+      "reference_location": "Ottawa",
+      "period": "2025",
+      "observations": 8760,
+      "latitude": 45.448154,
+      "longitude": -75.75235,
+      "mean_temperature_c": 6.72,
+      "min_temperature_c": -23.3,
+      "max_temperature_c": 34.5,
+      "mean_relative_humidity_pct": 72.58,
+      "source_evidence": {
+        "provider": "Open-Meteo",
+        "dataset": "Historical Weather API",
+        "source_url": "https://archive-api.open-meteo.com/v1/archive",
+        "retrieval_date": "2026-10-01",
+        "evidence_type": "fact"
+      },
+      "calculation": {
+        "type": "descriptive_statistics",
+        "derived_fields": [
+          "mean_temperature_c",
+          "min_temperature_c",
+          "max_temperature_c",
+          "mean_relative_humidity_pct"
+        ],
+        "evidence_type": "calculation"
+      },
+      "limitation": "Reference-location screening evidence; not a proposed data center site."
+    }
+  ]
+}
