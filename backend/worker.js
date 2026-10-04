@@ -110,10 +110,18 @@ export default {
         ORDER BY c.name
       `).all();
 
-      return Response.json({
-        count: result.results.length,
-        countries: result.results
-      });
+      return Response.json(
+  {
+    count: result.results.length,
+    countries: result.results
+  },
+  {
+    headers: {
+      "Access-Control-Allow-Origin": "http://localhost:8000"
+    }
+  }
+);
+
     }
 
     return new Response("Not Found", {

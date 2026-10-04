@@ -31,6 +31,9 @@ function parseCSVLine(line) {
     return values;
 }
 
+function isMissing(value) {
+    return value === null || value === undefined || value === "";
+}
 
 // ------------------------------------------
 // 2. APPLICATION INITIALIZATION
@@ -47,42 +50,28 @@ document.querySelector("main").appendChild(statusMessage);
 // 3. LOAD ENERGY DATASET
 // ------------------------------------------
 
-fetch("../data/energy-data.csv")
+fetch("http://127.0.0.1:8787/api/screening/energy")
     .then(response => {
-        console.log("Dataset connection status:", response.status);
+        console.log("Energy API connection status:", response.status);
 
         if (!response.ok) {
-            throw new Error(`Dataset request failed: ${response.status}`);
+            throw new Error(`Energy API request failed: ${response.status}`);
         }
 
-        return response.text();
+        return response.json();
     })
 
     .then(data => {
 
-        console.log("Energy dataset loaded successfully.");
+        console.log("Energy screening data loaded successfully.");
 
         // ----------------------------------
-        // 4. CSV → STRUCTURED DATA
+        // 4. API → STRUCTURED DATA
         // ----------------------------------
 
-        const lines = data.trim().split("\n");
-        const headers = parseCSVLine(lines[0]);
+        const countries = data.countries;
 
-        const countries = lines.slice(1).map(line => {
-            const values = parseCSVLine(line);
-            const countryObject = {};
-
-            headers.forEach((header, index) => {
-                countryObject[header] = values[index];
-            });
-
-            return countryObject;
-        });
-
-        console.log("Number of fields:", headers.length);
         console.log("Number of countries:", countries.length);
-
 
         // ----------------------------------
         // 5. SCREENING TRANSFORMATION
@@ -92,12 +81,12 @@ fetch("../data/energy-data.csv")
     .sort((a, b) => {
 
         const priceA =
-            a.business_price_usd_per_kwh === ""
+            isMissing(a.business_price_usd_per_kwh)
                 ? Infinity
                 : Number(a.business_price_usd_per_kwh);
 
         const priceB =
-            b.business_price_usd_per_kwh === ""
+            isMissing(b.business_price_usd_per_kwh)
                 ? Infinity
                 : Number(b.business_price_usd_per_kwh);
 
@@ -108,12 +97,12 @@ fetch("../data/energy-data.csv")
 
 const countriesWithBusinessPrice =
     countries.filter(country =>
-        country.business_price_usd_per_kwh !== ""
+        isMissing(country.business_price_usd_per_kwh)
     );
 
 const countriesWithoutBusinessPrice =
     countries.filter(country =>
-        country.business_price_usd_per_kwh === ""
+        isMissing(country.business_price_usd_per_kwh)
     );
 
 console.log(
@@ -154,7 +143,7 @@ countriesByBusinessPrice.forEach(country => {
     // --------------------------------------
 
     const hasBusinessPrice =
-        country.business_price_usd_per_kwh !== "";
+        isMissing(country.business_price_usd_per_kwh)
 
     if (hasBusinessPrice) {
 
@@ -175,17 +164,17 @@ countriesByBusinessPrice.forEach(country => {
     // --------------------------------------
 
     const solar =
-        country.electricity_generation_solar_pct === ""
+        isMissing(country.electricity_generation_solar_pct)
             ? null
             : Number(country.electricity_generation_solar_pct);
 
     const wind =
-        country.electricity_generation_wind_pct === ""
+        isMissing(country.electricity_generation_wind_pct)
             ? null
             : Number(country.electricity_generation_wind_pct);
 
     const hydro =
-        country.electricity_generation_hydro_pct === ""
+        isMissing(country.electricity_generation_hydro_pct)
             ? null
             : Number(country.electricity_generation_hydro_pct);
 
@@ -250,7 +239,8 @@ console.log(
 
 const countriesWithPrice =
     countriesByBusinessPrice.filter(
-        country => country.business_price_usd_per_kwh !== ""
+        country => !isMissing(country.business_price_usd_per_kwh)
+
     );
 
 const prices =
@@ -358,7 +348,7 @@ const balancedCandidate =
             const row = document.createElement("tr");
 
 const priceDisplay =
-    country.business_price_usd_per_kwh === ""
+    isMissing(country.business_price_usd_per_kwh)
         ? "Unknown"
         : `$${country.business_price_usd_per_kwh}/kWh`;
 
@@ -529,3 +519,4 @@ fetch("../data/climate/climate_summary.json")
     .catch(error => {
         console.error("Climate evidence error:", error);
     });
+
