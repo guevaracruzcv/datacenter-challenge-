@@ -1,6 +1,38 @@
+
+async function getRegisteredUser(env, authenticatedUserId) {
+  if (!authenticatedUserId) {
+    return null;
+  }
+
+  return env.DB
+    .prepare(`
+      SELECT
+        id,
+        authenticated_user_id,
+        email,
+        team_id,
+        role,
+        registered_at
+      FROM users
+      WHERE authenticated_user_id = ?
+    `)
+    .bind(authenticatedUserId)
+    .first();
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/dev/user") {
+  const user = await getRegisteredUser(env, "dev-user-001");
+
+  return Response.json({
+    development_only: true,
+    authenticated: false,
+    user
+  });
+}
 
     if (url.pathname === "/api/health") {
       return Response.json({
