@@ -52,6 +52,70 @@ export default {
       });
     }
 
+
+    if (url.pathname === "/api/screening/energy") {
+      const result = await env.DB.prepare(`
+        SELECT
+          c.name AS country,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'business_electricity_price'
+              THEN m.value
+            END
+          ) AS business_price_usd_per_kwh,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'total_energy_consumption'
+              THEN m.value
+            END
+          ) AS total_energy_consumption_exajoules,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'electricity_generation_solar_share'
+              THEN m.value
+            END
+          ) AS electricity_generation_solar_pct,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'electricity_generation_wind_share'
+              THEN m.value
+            END
+          ) AS electricity_generation_wind_pct,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'electricity_generation_hydro_share'
+              THEN m.value
+            END
+          ) AS electricity_generation_hydro_pct,
+
+          MAX(
+            CASE
+              WHEN m.metric_name = 'electricity_net_imports'
+              THEN m.value
+            END
+          ) AS electricity_net_imports_twh
+
+        FROM countries c
+
+        LEFT JOIN metrics m
+          ON m.country_id = c.id
+
+        GROUP BY c.id, c.name
+
+        ORDER BY c.name
+      `).all();
+
+      return Response.json({
+        count: result.results.length,
+        countries: result.results
+      });
+    }
+
     return new Response("Not Found", {
       status: 404
     });
