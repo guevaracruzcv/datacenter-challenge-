@@ -28,9 +28,33 @@ function canUseAiAdviser(user) {
   return ["registered", "editor", "team_admin"].includes(user.role);
 }
 
+function getSitesIdentity(request) {
+  const userId = request.headers.get("oai-authenticated-user-id");
+  const email = request.headers.get("oai-authenticated-user-email");
+
+  if (!userId) {
+    return null;
+  }
+
+  return {
+    authenticated_user_id: userId,
+    email: email || null
+  };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+        if (url.pathname === "/api/dev/sites-identity") {
+          const identity = getSitesIdentity(request);
+
+          return Response.json({
+          development_only: true,
+          trusted_authentication_verified: false,
+          identity
+        });
+       }
 
     if (url.pathname === "/api/dev/user") {
      const user = await getRegisteredUser(env, "dev-user-001");
