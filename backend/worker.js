@@ -20,19 +20,52 @@ async function getRegisteredUser(env, authenticatedUserId) {
     .first();
 }
 
+function canUseAiAdviser(user) {
+  if (!user) {
+    return false;
+  }
+
+  return ["registered", "editor", "team_admin"].includes(user.role);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/dev/user") {
-  const user = await getRegisteredUser(env, "dev-user-001");
+     const user = await getRegisteredUser(env, "dev-user-001");
 
-  return Response.json({
-    development_only: true,
-    authenticated: false,
-    user
-  });
-}
+     return Response.json({
+       development_only: true,
+       authenticated: false,
+       can_use_ai_adviser: canUseAiAdviser(user),
+       user
+     });
+    }
+
+        if (url.pathname === "/api/dev/protected-ai") {
+      const user = await getRegisteredUser(env, "dev-user-001");
+
+      if (!canUseAiAdviser(user)) {
+        return Response.json(
+          {
+            error: "Forbidden",
+            message: "User is not authorized to use the AI Adviser."
+          },
+          {
+            status: 403
+          }
+        );
+      }
+
+      return Response.json({
+        development_only: true,
+        authorized: true,
+        message: "AI Adviser access granted.",
+        user_role: user.role
+      });
+    }
+
 
     if (url.pathname === "/api/health") {
       return Response.json({
