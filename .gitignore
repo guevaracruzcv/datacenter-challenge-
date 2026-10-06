@@ -21,3 +21,6 @@ __pycache__/
 
 # Generated synchronization query
 database/sync_read_query.sql
+
+# Generated Sites build output
+dist/

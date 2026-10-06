@@ -50,7 +50,9 @@ document.querySelector("main").appendChild(statusMessage);
 // 3. LOAD ENERGY DATASET
 // ------------------------------------------
 
-fetch("http://127.0.0.1:8787/api/screening/energy")
+    const apiBaseUrl = window.location.port === "8000" ? "http://127.0.0.1:8787" : "";
+
+    fetch(`${apiBaseUrl}/api/screening/energy`)
     .then(response => {
         console.log("Energy API connection status:", response.status);
 
