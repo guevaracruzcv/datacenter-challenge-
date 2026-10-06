@@ -1,10 +1,13 @@
-import { readFile, mkdir } from "node:fs/promises";
+import { readFile, mkdir, copyFile, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build } from "esbuild";
 
 const projectRoot = resolve(".");
 const websiteDir = resolve(projectRoot, "website");
 const outputDir = resolve(projectRoot, "dist", "server");
+
+const packageOpenAiDir = resolve(projectRoot, "dist", ".openai");
+const packageDrizzleDir = resolve(packageOpenAiDir, "drizzle");
 
 const assetPaths = {
   index: resolve(websiteDir, "index.html"),
@@ -18,8 +21,24 @@ const assets = {
   js: await readFile(assetPaths.js, "utf8")
 };
 
+await rm(resolve(projectRoot, "dist"), {
+  recursive: true,
+  force: true
+});
+
 await mkdir(outputDir, { recursive: true });
 
+await mkdir(packageDrizzleDir, { recursive: true });
+
+await copyFile(
+  resolve(projectRoot, ".openai", "hosting.json"),
+  resolve(packageOpenAiDir, "hosting.json")
+);
+
+await copyFile(
+  resolve(projectRoot, "database", "migrations", "0001_initial_schema.sql"),
+  resolve(packageDrizzleDir, "0001_initial_schema.sql")
+);
 const generatedAssetsPath = resolve(outputDir, "generated-assets.mjs");
 
 const generatedEntryPath = resolve(outputDir, "generated-entry.mjs");
@@ -88,7 +107,7 @@ await build({
   format: "esm",
   platform: "neutral",
   target: "es2022",
-  outfile: resolve(outputDir, "index.mjs")
+  outfile: resolve(outputDir, "index.js")
 });
 
 console.log("Sites build preparation passed.");
