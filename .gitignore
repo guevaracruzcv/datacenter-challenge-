@@ -24,3 +24,6 @@ database/sync_read_query.sql
 
 # Generated Sites build output
 dist/
+
+# Local Wrangler development configuration
+wrangler.local.jsonc

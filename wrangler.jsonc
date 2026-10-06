@@ -7,8 +7,6 @@
     {
       "binding": "DB",
       "database_name": "datacenter-challenge-db",
-      "database_id": "local-datacenter-challenge-db",
-      "preview_database_id": "local-datacenter-challenge-db",
       "migrations_dir": "database/migrations"
     }
   ]
