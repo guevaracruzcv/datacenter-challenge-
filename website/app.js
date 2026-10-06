@@ -239,23 +239,27 @@ console.log(
 // D. INITIAL THREE-COUNTRY SHORTLIST
 // --------------------------------------
 
-const countriesWithPrice =
+const comparableCountries =
     countriesByBusinessPrice.filter(
-        country => !isMissing(country.business_price_usd_per_kwh)
-
+        country =>
+            !isMissing(country.business_price_usd_per_kwh) &&
+            country.solarWindHydroShare !== null
     );
-if (countriesWithPrice.length < 3) {
-    throw new Error("At least three countries with business electricity price data are required to build the shortlist.");
+
+if (comparableCountries.length < 3) {
+    throw new Error(
+        "At least three countries with both business electricity price and generation-mix data are required to build the shortlist."
+    );
 }
 
 
 const prices =
-    countriesWithPrice.map(
+    comparableCountries.map(
         country => Number(country.business_price_usd_per_kwh)
     );
 
 const mixes =
-    countriesWithPrice.map(
+    comparableCountries.map(
         country => country.solarWindHydroShare
     );
 
@@ -265,17 +269,21 @@ const maxPrice = Math.max(...prices);
 const minMix = Math.min(...mixes);
 const maxMix = Math.max(...mixes);
 
-countriesWithPrice.forEach(country => {
+comparableCountries.forEach(country => {
 
     const price =
         Number(country.business_price_usd_per_kwh);
 
     const normalizedCostScore =
-        (maxPrice - price) / (maxPrice - minPrice);
+        maxPrice === minPrice
+            ? 0.5
+            : (maxPrice - price) / (maxPrice - minPrice);
 
     const normalizedMixScore =
-        (country.solarWindHydroShare - minMix) /
-        (maxMix - minMix);
+        maxMix === minMix
+            ? 0.5
+            : (country.solarWindHydroShare - minMix) /
+              (maxMix - minMix);
 
     country.balancedScore =
         0.5 * normalizedCostScore +
@@ -287,23 +295,25 @@ countriesWithPrice.forEach(country => {
 // --------------------------------------
 
 const costCandidate =
-    countriesWithPrice.reduce((best, country) =>
-        Number(country.business_price_usd_per_kwh) <
-        Number(best.business_price_usd_per_kwh)
+    comparableCountries.reduce((best, country) =>
+        Number(country.business_price_usd_per_kwh) < Number(best.business_price_usd_per_kwh) ||
+        (Number(country.business_price_usd_per_kwh) === Number(best.business_price_usd_per_kwh) &&
+         country.country.localeCompare(best.country) < 0)
             ? country
             : best
     );
 
 const mixCandidate =
-    countriesWithPrice.reduce((best, country) =>
-        country.solarWindHydroShare >
-        best.solarWindHydroShare
+    comparableCountries.filter(country => country.country !== costCandidate.country).reduce((best, country) =>
+        country.solarWindHydroShare > best.solarWindHydroShare ||
+        (country.solarWindHydroShare === best.solarWindHydroShare &&
+         country.country.localeCompare(best.country) < 0)
             ? country
             : best
     );
 
 const remainingCountries =
-    countriesWithPrice.filter(
+    comparableCountries.filter(
         country =>
             country.country !== costCandidate.country &&
             country.country !== mixCandidate.country
@@ -311,7 +321,9 @@ const remainingCountries =
 
 const balancedCandidate =
     remainingCountries.reduce((best, country) =>
-        country.balancedScore > best.balancedScore
+        country.balancedScore > best.balancedScore ||
+        (country.balancedScore === best.balancedScore &&
+         country.country.localeCompare(best.country) < 0)
             ? country
             : best
     );
@@ -469,6 +481,7 @@ shortlistContainer.appendChild(shortlistTable);
 })
     .catch(error => {
         console.error("Error loading energy dataset:", error);
+        statusMessage.textContent = "Decision screening unavailable: " + error.message;
     });
 
 

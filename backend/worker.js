@@ -46,52 +46,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-        if (url.pathname === "/api/dev/sites-identity") {
-          const identity = getSitesIdentity(request);
-
-          return Response.json({
-          development_only: true,
-          trusted_authentication_verified: false,
-          identity
-        });
-       }
-
-    if (url.pathname === "/api/dev/user") {
-     const user = await getRegisteredUser(env, "dev-user-001");
-
-     return Response.json({
-       development_only: true,
-       authenticated: false,
-       can_use_ai_adviser: canUseAiAdviser(user),
-       user
-     });
-    }
-
-        if (url.pathname === "/api/dev/protected-ai") {
-      const identity = getSitesIdentity(request);
-      const user = await getRegisteredUser(env, identity?.authenticated_user_id);
-
-      if (!canUseAiAdviser(user)) {
-        return Response.json(
-          {
-            error: "Forbidden",
-            message: "User is not authorized to use the AI Adviser."
-          },
-          {
-            status: 403
-          }
-        );
-      }
-
-      return Response.json({
-        development_only: true,
-        authorized: true,
-        message: "AI Adviser access granted.",
-        user_role: user.role
-      });
-    }
-
-
     if (url.pathname === "/api/health") {
       return Response.json({
         status: "ok",
