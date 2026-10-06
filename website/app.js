@@ -99,7 +99,7 @@ document.querySelector("main").appendChild(statusMessage);
 
 const countriesWithBusinessPrice =
     countries.filter(country =>
-        isMissing(country.business_price_usd_per_kwh)
+        !isMissing(country.business_price_usd_per_kwh)
     );
 
 const countriesWithoutBusinessPrice =
@@ -145,7 +145,7 @@ countriesByBusinessPrice.forEach(country => {
     // --------------------------------------
 
     const hasBusinessPrice =
-        isMissing(country.business_price_usd_per_kwh)
+        !isMissing(country.business_price_usd_per_kwh)
 
     if (hasBusinessPrice) {
 
@@ -244,6 +244,10 @@ const countriesWithPrice =
         country => !isMissing(country.business_price_usd_per_kwh)
 
     );
+if (countriesWithPrice.length < 3) {
+    throw new Error("At least three countries with business electricity price data are required to build the shortlist.");
+}
+
 
 const prices =
     countriesWithPrice.map(

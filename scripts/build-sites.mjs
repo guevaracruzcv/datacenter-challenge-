@@ -12,13 +12,15 @@ const packageDrizzleDir = resolve(packageOpenAiDir, "drizzle");
 const assetPaths = {
   index: resolve(websiteDir, "index.html"),
   css: resolve(websiteDir, "style.css"),
-  js: resolve(websiteDir, "app.js")
+  js: resolve(websiteDir, "app.js"),
+  climate: resolve(projectRoot, "data", "climate", "climate_summary.json")
 };
 
 const assets = {
   index: await readFile(assetPaths.index, "utf8"),
   css: await readFile(assetPaths.css, "utf8"),
-  js: await readFile(assetPaths.js, "utf8")
+  js: await readFile(assetPaths.js, "utf8"),
+  climate: await readFile(assetPaths.climate, "utf8")
 };
 
 await rm(resolve(projectRoot, "dist"), {
@@ -92,6 +94,10 @@ export const publicAssets = {
   "/website/app.js": {
     contentType: "application/javascript; charset=utf-8",
     body: ${JSON.stringify(assets.js)}
+  },
+  "/data/climate/climate_summary.json": {
+    contentType: "application/json; charset=utf-8",
+    body: ${JSON.stringify(assets.climate)}
   }
 };
 `;

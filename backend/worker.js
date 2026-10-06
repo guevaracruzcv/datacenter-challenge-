@@ -68,7 +68,8 @@ export default {
     }
 
         if (url.pathname === "/api/dev/protected-ai") {
-      const user = await getRegisteredUser(env, "dev-user-001");
+      const identity = getSitesIdentity(request);
+      const user = await getRegisteredUser(env, identity?.authenticated_user_id);
 
       if (!canUseAiAdviser(user)) {
         return Response.json(
