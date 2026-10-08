@@ -13,6 +13,7 @@ const assetPaths = {
   index: resolve(websiteDir, "index.html"),
   css: resolve(websiteDir, "style.css"),
   js: resolve(websiteDir, "app.js"),
+  adviser: resolve(websiteDir, "adviser.js"),
   climate: resolve(projectRoot, "data", "climate", "climate_summary.json")
 };
 
@@ -20,6 +21,7 @@ const assets = {
   index: await readFile(assetPaths.index, "utf8"),
   css: await readFile(assetPaths.css, "utf8"),
   js: await readFile(assetPaths.js, "utf8"),
+  adviser: await readFile(assetPaths.adviser, "utf8"),
   climate: await readFile(assetPaths.climate, "utf8")
 };
 
@@ -94,6 +96,10 @@ export const publicAssets = {
   "/website/app.js": {
     contentType: "application/javascript; charset=utf-8",
     body: ${JSON.stringify(assets.js)}
+  },
+  "/website/adviser.js": {
+    contentType: "application/javascript; charset=utf-8",
+    body: ${JSON.stringify(assets.adviser)}
   },
   "/data/climate/climate_summary.json": {
     contentType: "application/json; charset=utf-8",

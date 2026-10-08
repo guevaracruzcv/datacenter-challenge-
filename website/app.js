@@ -195,9 +195,15 @@ countriesByBusinessPrice.forEach(country => {
 // --------------------------------------
 
 const netImports =
-    Number(country.electricity_net_imports_twh);
+    isMissing(country.electricity_net_imports_twh)
+        ? null
+        : Number(country.electricity_net_imports_twh);
 
-if (netImports > 0) {
+if (netImports === null) {
+
+    country.electricityTradePosition = "Unknown";
+
+} else if (netImports > 0) {
 
     country.electricityTradePosition = "Net Importer";
 
@@ -383,11 +389,17 @@ const energyMixDisplay =
         : `${country.solarWindHydroShare.toFixed(2)}%`;
 
         const netImports =
-    Number(country.electricity_net_imports_twh);
+    isMissing(country.electricity_net_imports_twh)
+        ? null
+        : Number(country.electricity_net_imports_twh);
 
 let tradePositionDisplay;
 
-if (netImports > 0) {
+if (netImports === null) {
+
+    tradePositionDisplay = "Unknown";
+
+} else if (netImports > 0) {
 
     tradePositionDisplay =
         `Net Importer (+${netImports.toFixed(2)} TWh)`;
@@ -509,6 +521,8 @@ fetch("../data/climate/climate_summary.json")
                         <th>Max Temp. °C</th>
                         <th>Mean RH %</th>
                         <th>Observations</th>
+                        <th>Period</th>
+                        <th>Retrieved</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -524,6 +538,8 @@ fetch("../data/climate/climate_summary.json")
                     <td>${candidate.max_temperature_c}</td>
                     <td>${candidate.mean_relative_humidity_pct}</td>
                     <td>${candidate.observations}</td>
+                    <td>${candidate.period}</td>
+                    <td>${candidate.source_evidence.retrieval_date}</td>
                 </tr>
             `;
         });

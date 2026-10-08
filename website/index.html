@@ -98,6 +98,18 @@
 
     <div id="climate-data"></div>
 
+    <div id="climate-refresh-controls" hidden>
+        <label for="climate-country">Existing climate reference</label>
+        <select id="climate-country">
+            <option value="Indonesia">Indonesia — Jakarta</option>
+            <option value="Brazil">Brazil — Brasilia</option>
+            <option value="Canada">Canada — Ottawa</option>
+        </select>
+        <button id="climate-refresh-button" type="button" disabled>Refresh 2025 climate evidence</button>
+    </div>
+    <p id="climate-refresh-status" role="status" aria-live="polite"></p>
+    <div id="climate-refresh-data"></div>
+
     <p class="evidence-note">
         <strong>Evidence limitation:</strong>
         Climate observations represent Jakarta, Brasilia, and Ottawa
@@ -115,9 +127,28 @@
             </p>
         </section>
 
+        <section id="ask-the-adviser">
+            <h2>Ask the Design Adviser</h2>
+            <p>Ask about the saved design and its supporting evidence.</p>
+            <p id="account-status" role="status" aria-live="polite">Checking registration…</p>
+            <a id="chatgpt-sign-in" href="/signin-with-chatgpt?return_to=%2Fwebsite%2F" target="_top">Sign in with ChatGPT</a>
+            <button id="register-button" type="button" hidden disabled>Register for this application</button>
+            <form id="adviser-form">
+                <label for="adviser-design">Saved initial design</label>
+                <select id="adviser-design" required></select>
+                <label for="adviser-question">Your question</label>
+                <textarea id="adviser-question" rows="3" maxlength="2000" required disabled></textarea>
+                <button id="adviser-send" type="submit" disabled>Ask the Adviser</button>
+            </form>
+            <div id="adviser-answer" aria-live="polite"></div>
+            <p id="adviser-usage"></p>
+            <p class="evidence-note">The Adviser discusses an academic initial design. It does not provide professional engineering certification.</p>
+        </section>
+
     </main>
 
 <script src="app.js"></script>
+<script src="adviser.js"></script>
 
 </body>
 
