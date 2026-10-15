@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    
+    <title>AI Data Center Decision Platform</title>
+
+</head>
+
+<body>
+
+    <header>
+        <h1>AI Data Center Decision Platform</h1>
+        <p>Evidence-based planning for a 25 MW AI data center.</p>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Data Center Baseline</h2>
+            <p>IT Load: 20 MW</p>
+            <p>PUE: 1.25</p>
+            <p>Facility Load: 25 MW</p>
+            <p>Annual Electricity Requirement: 219 GWh/year</p>
+        </section>
+
+        <section>
+            <h2>Energy Intelligence</h2>
+
+<section>
+    <h2>Country Energy Screening</h2>
+    <p>Initial energy indicators from the project dataset.</p>
+
+    <div id="country-data"></div>
+
+    <p class="evidence-note">
+        <strong>Evidence note:</strong>
+        Annual electricity cost is an indicative calculation based on
+        219 GWh/year and the national business electricity price available
+        in the dataset. It is not a site-specific or negotiated data center tariff.
+    </p>
+
+    <p class="evidence-note">
+        <strong>Energy mix note:</strong>
+        Solar + Wind + Hydro Share is a calculated indicator based only on
+        the solar, wind, and hydro percentages reported in the dataset.
+        It should not be interpreted as the total renewable, clean, or
+        low-carbon share of a country's electricity generation.
+    </p>
+<p class="evidence-note">
+    <strong>Electricity trade note:</strong>
+    Electricity Trade Position is derived from national net electricity
+    imports reported in the dataset. Positive values indicate net imports,
+    negative values indicate net exports, and zero indicates no net trade
+    reported. This indicator provides national electricity-system context
+    and should not be interpreted as evidence of site-specific grid capacity,
+    reliability, or energy security.
+</p>
+
+</section>
+            <p>15 countries available for initial screening.</p>
+            <p>49 energy and evidence fields available.</p>
+        </section>
+
+<section>
+    <h2>Initial Candidate Shortlist</h2>
+
+    <p>
+        Three distinct countries selected for deeper investigation
+        using transparent screening profiles.
+    </p>
+
+    <div id="candidate-shortlist"></div>
+
+    <p class="evidence-note">
+        <strong>Screening note:</strong>
+        These countries are candidates for further investigation,
+        not final location recommendations. The current screening uses
+        electricity price and Solar + Wind + Hydro Share. Site-specific
+        grid capacity, reliability, connectivity, cooling, water,
+        regulatory conditions, and other engineering evidence remain
+        to be assessed.
+    </p>
+</section>
+
+<section>
+    <h2>Climate Evidence</h2>
+
+    <p>
+        Initial climate screening for the three candidate countries
+        using 2025 hourly temperature and relative humidity observations
+        from representative reference locations.
+    </p>
+
+    <div id="climate-data"></div>
+
+    <div id="climate-refresh-controls" hidden>
+        <label for="climate-country">Existing climate reference</label>
+        <select id="climate-country">
+            <option value="Indonesia">Indonesia — Jakarta</option>
+            <option value="Brazil">Brazil — Brasilia</option>
+            <option value="Canada">Canada — Ottawa</option>
+        </select>
+        <button id="climate-refresh-button" type="button" disabled>Refresh 2025 climate evidence</button>
+    </div>
+    <p id="climate-refresh-status" role="status" aria-live="polite"></p>
+    <div id="climate-refresh-data"></div>
+
+    <p class="evidence-note">
+        <strong>Evidence limitation:</strong>
+        Climate observations represent Jakarta, Brasilia, and Ottawa
+        as reference locations for initial screening. They do not
+        represent proposed data center sites or final cooling-design
+        conditions.
+    </p>
+</section>
+
+        <section>
+            <h2>Decision Process</h2>
+            <p>
+                Energy Screening → 3 Candidate Countries →
+                Detailed Analysis → Build / Lease / Hybrid
+            </p>
+        </section>
+
+        <section id="ask-the-adviser">
+            <h2>Ask the Design Adviser</h2>
+            <p>Ask about the saved design and its supporting evidence.</p>
+            <p id="account-status" role="status" aria-live="polite">Checking registration…</p>
+            <a id="chatgpt-sign-in" href="/signin-with-chatgpt?return_to=%2Fwebsite%2F" target="_top">Sign in with ChatGPT</a>
+            <button id="register-button" type="button" hidden disabled>Register for this application</button>
+            <form id="adviser-form">
+                <label for="adviser-design">Saved initial design</label>
+                <select id="adviser-design" required></select>
+                <label for="adviser-question">Your question</label>
+                <textarea id="adviser-question" rows="3" maxlength="2000" required disabled></textarea>
+                <button id="adviser-send" type="submit" disabled>Ask the Adviser</button>
+            </form>
+            <div id="adviser-answer" aria-live="polite"></div>
+            <p id="adviser-usage"></p>
+            <p class="evidence-note">The Adviser discusses an academic initial design. It does not provide professional engineering certification.</p>
+        </section>
+
+    </main>
+
+<script src="app.js"></script>
+<script src="adviser.js"></script>
+
+</body>
+
+</html>

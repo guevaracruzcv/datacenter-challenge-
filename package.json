@@ -1,0 +1,17 @@
+{
+  "name": "datacenter-challenge",
+  "version": "1.0.0",
+  "description": "This project develops an evidence-based decision platform for the initial design of a 25 MW AI data center.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "wrangler": "^4.146.0"
+  }
+}

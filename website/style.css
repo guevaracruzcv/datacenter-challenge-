@@ -1,0 +1,142 @@
+/* =========================================
+   AI Data Center Decision Platform
+   Version 0.1
+   ========================================= */
+
+
+/* ----- PAGE BASE ----- */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f6f8;
+    color: #1f2933;
+}
+
+
+/* ----- HEADER ----- */
+
+header {
+    background-color: #102a43;
+    color: white;
+    padding: 40px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 36px;
+}
+
+header p {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+
+/* ----- MAIN CONTENT ----- */
+
+main {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+
+/* ----- SECTIONS / CARDS ----- */
+
+section {
+    background-color: white;
+    margin-bottom: 25px;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+section h2 {
+    margin-top: 0;
+    color: #102a43;
+}
+
+
+/* ----- TEXT ----- */
+
+p {
+    line-height: 1.6;
+}
+
+/* ----- COUNTRY ENERGY TABLE ----- */
+
+#country-data,
+#climate-data {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+thead {
+    background-color: #102a43;
+    color: white;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #d9e2ec;
+}
+
+th {
+    font-weight: 600;
+}
+
+tbody tr:hover {
+    background-color: #f0f4f8;
+}
+
+/* ----- EVIDENCE NOTES ----- */
+
+.evidence-note {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background-color: #f0f4f8;
+    border-left: 4px solid #486581;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ----- REQUIRED REGISTRATION AND ADVISER FLOW ----- */
+
+#adviser-form {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#adviser-form select,
+#adviser-form textarea,
+#adviser-form button,
+#register-button,
+#climate-refresh-controls select,
+#climate-refresh-button {
+    font: inherit;
+    padding: 10px;
+}
+
+#adviser-form textarea {
+    resize: vertical;
+}
+
+#adviser-form button,
+#register-button {
+    width: fit-content;
+    cursor: pointer;
+}
+
+#adviser-form button:disabled {
+    cursor: default;
+}

@@ -1,0 +1,33 @@
+# Node dependencies
+node_modules/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Cloudflare / Wrangler local state
+.wrangler/
+
+# Logs
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Generated synchronization query
+database/sync_read_query.sql
+
+# Generated Sites build output
+dist/
+
+# Local Wrangler development configuration
+wrangler.local.jsonc
+
+# Historical generated publication archives
+datacenter-sites-*.tar.gz
+datacenter-source-*.bundle
