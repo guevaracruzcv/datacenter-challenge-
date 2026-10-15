@@ -224,6 +224,75 @@ test("unknown D1 PUE remains unknown rather than zero", async t => {
   assert.equal(result.calculations.annual_energy_gwh, null);
 });
 
+for (const annualEnergy of ["219 GWh", "219,000 MWh"]) {
+  test(`correct baseline energy assertions pass with ${annualEnergy}`, async t => {
+    const f = fixture();
+    const answer = {
+      statements: [{ kind: "calculation", source_ids: [], text:
+        `IT load = 20 MW; PUE = 1.25; facility load = 25 MW; operating hours = 8,760/year; annual electricity requirement is ${annualEnergy}. 20 MW IT load is distinct from 25 MW facility load.` }],
+      uncertainty: ["PUE 1.25 is an assumption for 8,760 hours/year."]
+    };
+    mockModel(t, answer);
+    const response = await call("/api/ai/adviser", f, { question: "Explain the baseline.", design_id: 1 });
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.deepEqual(result.statements, answer.statements);
+    assert.deepEqual(result.calculations, { facility_load_mw: 25, annual_energy_gwh: 219, operating_hours: 8760 });
+  });
+}
+
+for (const text of [
+  "Annual electricity requirement is 999 GWh.",
+  "Annual facility electricity is 999,000 MWh.",
+  "Facility load is 30 MW.",
+  "IT load is 25 MW.",
+  "PUE is 1.5.",
+  "Operating hours = 8,000/year.",
+  "The facility operates for 8,000 hours/year."
+]) {
+  test(`contradictory energy assertion is rejected: ${text}`, async t => {
+    const f = fixture();
+    mockModel(t, { statements: [{ kind: "calculation", text, source_ids: [] }], uncertainty: [] });
+    const response = await call("/api/ai/adviser", f, { question: "Energy?", design_id: 1 });
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, "InvalidAnswer");
+  });
+}
+
+for (const text of ["Facility load is 25 MW.", "Annual energy is 219 GWh."]) {
+  test(`changed PUE rejects stale model result: ${text}`, async t => {
+    const f = fixture();
+    f.design.pue = 1.5;
+    mockModel(t, { statements: [{ kind: "calculation", text, source_ids: [] }], uncertainty: [] });
+    const response = await call("/api/ai/adviser", f, { question: "Energy now?", design_id: 1 });
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, "InvalidAnswer");
+  });
+  test(`missing PUE rejects invented model result: ${text}`, async t => {
+    const f = fixture();
+    f.design.pue = null;
+    mockModel(t, { statements: [{ kind: "calculation", text, source_ids: [] }], uncertainty: [] });
+    const response = await call("/api/ai/adviser", f, { question: "Energy?", design_id: 1 });
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, "InvalidAnswer");
+  });
+}
+
+for (const kind of ["fact", "estimate", "assumption", "design_decision", "unknown", "uncertainty"]) {
+  test(`contradictory energy cannot bypass validation in ${kind}`, async t => {
+    const f = fixture();
+    const text = "Annual electricity requirement is 999 GWh.";
+    mockModel(t, kind === "uncertainty"
+      ? { statements: [{ kind: "unknown", text: "Cooling is unknown.", source_ids: [] }], uncertainty: [text] }
+      : { statements: [{ kind, text, source_ids: [12] }], uncertainty: [] });
+    const response = await call("/api/ai/adviser", f, { question: "Energy?", design_id: 1 });
+    assert.equal(response.status, 502);
+    const result = await response.json();
+    assert.equal(result.error, "InvalidAnswer");
+    assert.equal("statements" in result, false);
+  });
+}
+
 test("missing saved design stops the request without fallback records", async t => {
   const f = fixture();
   f.DB.missingDesign = true;

@@ -136,7 +136,37 @@ const answerSchema = {
   required: ["statements", "uncertainty"]
 };
 
-function validateAnswer(answer, sources) {
+function validateEnergyText(text, design, calculations) {
+  // Only the exercise's simple numeric forms: MW, GWh/MWh, hours and PUE.
+  const number = "[+-]?(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?";
+  const check = (pattern, expected) => {
+    for (const match of text.matchAll(pattern)) {
+      const value = Number(match[1].replaceAll(",", ""));
+      const reference = expected(match);
+      // Allow floating-point roundoff, not a change to the modeled result.
+      if (!Number.isFinite(reference) ||
+          Math.abs(value - reference) > 1e-9 * Math.max(1, Math.abs(reference))) {
+        throw new HttpError(502, "InvalidAnswer", "The Adviser energy figures contradict the saved design calculations. Try again.");
+      }
+    }
+  };
+  check(new RegExp(`(${number})\\s*MW\\b`, "gi"), match => {
+    const before = text.slice(0, match.index);
+    const after = text.slice(match.index + match[0].length);
+    const isIt = /\bIT(?:\s+(?:load|power))?\s*(?:(?:is|of|=|:)\s*)?$/i.test(before) ||
+      /^\s*(?:of\s+)?IT\b/i.test(after);
+    return isIt ? (design.it_load_mw > 0 ? design.it_load_mw : null) : calculations.facility_load_mw;
+  });
+  check(new RegExp(`(${number})\\s*(GWh|MWh)\\b`, "gi"), match =>
+    calculations.annual_energy_gwh == null ? null :
+      calculations.annual_energy_gwh * (match[2].toLowerCase() === "mwh" ? 1000 : 1));
+  check(new RegExp(`\\bPUE\\s*(?:(?:is|of|=|:)\\s*)?(${number})\\b`, "gi"), () =>
+    design.pue >= 1 ? design.pue : null);
+  check(new RegExp(`(${number})\\s*(?:hours?|hrs?|h)\\b`, "gi"), () => calculations.operating_hours);
+  check(new RegExp(`\\boperating\\s+hours\\s*(?:(?:are|is|of|=|:)\\s*)?(${number})\\b`, "gi"), () => calculations.operating_hours);
+}
+
+function validateAnswer(answer, sources, design, calculations) {
   const ids = new Set(sources.map(source => source.id));
   const kinds = answerSchema.properties.statements.items.properties.kind.enum;
   if (!answer || !Array.isArray(answer.statements) || answer.statements.length < 1 ||
@@ -152,6 +182,9 @@ function validateAnswer(answer, sources) {
         (["fact", "estimate"].includes(statement.kind) && statement.source_ids.length === 0)) {
       throw new HttpError(502, "InvalidCitations", "The Adviser did not provide valid evidence citations. Try again.");
     }
+  }
+  for (const text of [...answer.statements.map(statement => statement.text), ...answer.uncertainty]) {
+    validateEnergyText(text, design, calculations);
   }
 }
 
@@ -221,7 +254,7 @@ export async function askAdviser(request, env, user) {
   } catch {
     throw new HttpError(502, "InvalidAnswer", "The model returned an unreadable answer.");
   }
-  validateAnswer(answer, evidence.sources);
+  validateAnswer(answer, evidence.sources, evidence.design, evidence.calculations);
   const used = new Set(answer.statements.flatMap(statement => statement.source_ids));
   const usageFields = ["input_tokens", "output_tokens", "total_tokens"];
   const usage = usageFields.every(key => Number.isSafeInteger(result.usage?.[key]) && result.usage[key] >= 0)
