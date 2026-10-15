@@ -81,7 +81,7 @@ flowchart TB
 
         EVIDENCE["countries  sources  metrics<br/>Schema and seeds VERIFIED LOCALLY in SQLite<br/>15 countries  90 sources  89 metrics"]
 
-        DESIGNS["designs  design_claims<br/>Schema VERIFIED LOCALLY in SQLite<br/>NOT YET POPULATED by current seeds"]
+        DESIGNS["designs  design_claims<br/>Schema VERIFIED LOCALLY in SQLite<br/>Academic draft base-design seed and classified claims<br/>Seed presence VERIFIED LOCALLY; hosted D1 application NOT VERIFIED"]
 
         SAVED["Saved climate evidence<br/>Represented in sources + metrics<br/>IMPLEMENTED / NOT VERIFIED in real D1"]
     end
@@ -161,6 +161,8 @@ Climate refresh uses a fixed Open-Meteo endpoint, validates hourly data before p
 
 The database schema and seeds were checked in local SQLite memory. Hosted D1, Sites integration, external API calls, and build/package deployment retain the unverified status shown in the diagram.
 
+In the current repository, `database/seed_base_design.sql` provides a reproducible academic draft base design and classified `design_claims`. Its presence is VERIFIED LOCALLY. Application of this seed to hosted D1 remains NOT VERIFIED; repository availability does not establish hosted database population.
+
 ## Legend
 
 | Label or notation | Meaning |
@@ -190,6 +192,7 @@ Paths below are relative to the repository root. Generated package paths identif
 | Users, countries, sources, metrics, designs and design-claims schema | `database/migrations/0001_initial_schema.sql` |
 | Energy source data | `data/energy-data.csv` |
 | Energy importers and SQL seeds | `models/import_energy_to_d1.py`, `models/import_additional_energy_to_d1.py`, `database/seed_energy.sql`, `database/seed_energy_additional.sql` |
+| Reproducible academic draft base design and classified design claims; hosted D1 application NOT VERIFIED | `database/seed_base_design.sql` |
 | 2025 climate reference snapshots | `data/climate/jakarta_2025.json`, `data/climate/brasilia_2025.json`, `data/climate/ottawa_2025.json` |
 | Static climate summary and local preparation | `data/climate/climate_summary.json`, `models/summarize_climate.py`, `models/validate_climate.py`, `models/compare_climate.py` |
 | Sites build and hosting configuration | `scripts/build-sites.mjs`, `.openai/hosting.json` |
@@ -203,7 +206,7 @@ Sites authentication/dispatch, hosted D1, OpenAI Responses API, Open-Meteo and r
 - Real Sites authentication/dispatch and forwarding of `oai-authenticated-*` identity headers were not verified in integration. Local authorization and registration checks used mocks.
 - The generated wrapper, adapter in the hosted package, build/package execution and deployment were not demonstrated in the audit.
 - Hosted D1 runtime, actual seed loading, and saved climate source/metric writes and reads were not verified. Schema and seed checks used SQLite memory; the local counts of 15 countries, 90 sources and 89 metrics do not establish hosted database contents.
-- Current seeds contain no users and do not populate `designs` or `design_claims`. Adviser retrieval checks with mocks do not establish availability of populated designs in hosted D1.
+- Current seeds contain no users. `database/seed_base_design.sql` provides a reproducible academic draft base design and classified `design_claims`; its repository presence is VERIFIED LOCALLY, while hosted D1 application remains NOT VERIFIED. Adviser retrieval checks with mocks do not establish availability of populated designs in hosted D1.
 - The real OpenAI Responses API call was implemented but not verified. Local response/schema/source-ID checks used a simulated model.
 - Real Open-Meteo refresh was implemented but not verified. Local snapshot reproduction and mocked refresh checks do not establish the real external request or hosted persistence path.
 - Registered energy-provider provenance does not establish automatic ingestion. The climate references and static summaries do not identify proposed data-center sites.
