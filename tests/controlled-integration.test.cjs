@@ -144,6 +144,88 @@ async function loadWorker() {
   return workerModule;
 }
 
+const screeningMetrics = [
+  ["business_electricity_price", "business_price_usd_per_kwh", 0.1, "USD/kWh", "2025-12"],
+  ["total_energy_consumption", "total_energy_consumption_exajoules", 1, "EJ", "2024"],
+  ["electricity_generation_solar_share", "electricity_generation_solar_pct", 20, "%", "2024"],
+  ["electricity_generation_wind_share", "electricity_generation_wind_pct", 0, "%", "2024"],
+  ["electricity_generation_hydro_share", "electricity_generation_hydro_pct", 0, "%", "2024"],
+  ["electricity_net_imports", "electricity_net_imports_twh", -2.5, "TWh", "2024"]
+];
+
+async function screenEvidence(rows) {
+  const { default: worker } = await loadWorker();
+  const DB = {
+    prepare(sql) {
+      assert.doesNotMatch(sql, /\b(MAX|MIN|AVG)\s*\(|GROUP BY/i);
+      assert.match(sql, /m\.metric_name, m\.value, m\.unit, m\.period/);
+      assert.match(sql, /LEFT JOIN metrics/);
+      return {
+        bind(...metrics) {
+          assert.deepEqual(metrics, screeningMetrics.map(([metric]) => metric));
+          return this;
+        },
+        async all() { return { results: rows }; }
+      };
+    }
+  };
+  return worker.fetch(new Request("https://sites.example/api/screening/energy"), { DB });
+}
+
+test("screening preserves unambiguous values and accepts identical observations", async () => {
+  const rows = screeningMetrics.map(([metric_name, , value, unit, period]) =>
+    ({ country: "Synthetic country", metric_name, value, unit, period }));
+  const response = await screenEvidence([...rows, ...rows.map(row => ({ ...row }))]);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "http://localhost:8000");
+  assert.deepEqual(await response.json(), {
+    count: 1,
+    countries: [{ country: "Synthetic country", ...Object.fromEntries(
+      screeningMetrics.map(([, field, value]) => [field, value])
+    ) }]
+  });
+});
+
+test("screening retains missing evidence and does not treat it as conflicting", async () => {
+  const response = await screenEvidence([
+    { country: "Known", metric_name: "business_electricity_price", value: null, unit: null, period: null },
+    { country: "Known", metric_name: "business_electricity_price", value: 0.1, unit: "USD/kWh", period: "2025-12" },
+    { country: "Known", metric_name: "business_electricity_price", value: null, unit: "unknown", period: "unknown" },
+    { country: "Missing", metric_name: "business_electricity_price", value: null, unit: "USD/kWh", period: "2024" },
+    { country: "Missing", metric_name: "business_electricity_price", value: null, unit: "unknown", period: "2025" },
+    { country: "No observations", metric_name: null, value: null, unit: null, period: null }
+  ]);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.count, 3);
+  assert.deepEqual(body.countries, ["Known", "Missing", "No observations"].map(name => ({
+    country: name,
+    ...Object.fromEntries(screeningMetrics.map(([, field]) => [field, null])),
+    ...(name === "Known" ? { business_price_usd_per_kwh: 0.1 } : {})
+  })));
+});
+
+for (const [metric_name, , value, unit, period] of screeningMetrics) {
+  for (const [difference, change] of [
+    ["value", { value: value + 1 }],
+    ["unit", { unit: "incompatible-unit" }],
+    ["period", { period: "different-period" }]
+  ]) {
+    test(`screening rejects conflicting ${difference} for ${metric_name}`, async () => {
+      const row = { country: "Synthetic country", metric_name, value, unit, period };
+      for (const rows of [[row, { ...row, ...change }], [{ ...row, ...change }, row]]) {
+        const response = await screenEvidence(rows);
+        assert.equal(response.status, 409);
+        const body = await response.json();
+        assert.equal(body.error, "EvidenceConflict");
+        assert.equal(body.country, row.country);
+        assert.equal(body.metric, metric_name);
+        assert.equal("countries" in body, false);
+      }
+    });
+  }
+}
+
 function identityRequest(headers = {}, body = {}) {
   return new Request("https://sites.example/api/ai/adviser", {
     method: "POST", headers: { "Content-Type": "application/json", ...headers },

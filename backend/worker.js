@@ -204,74 +204,53 @@ export default {
 
 
     if (url.pathname === "/api/screening/energy") {
+      const fields = {
+        business_electricity_price: "business_price_usd_per_kwh",
+        total_energy_consumption: "total_energy_consumption_exajoules",
+        electricity_generation_solar_share: "electricity_generation_solar_pct",
+        electricity_generation_wind_share: "electricity_generation_wind_pct",
+        electricity_generation_hydro_share: "electricity_generation_hydro_pct",
+        electricity_net_imports: "electricity_net_imports_twh"
+      };
       const result = await env.DB.prepare(`
-        SELECT
-          c.name AS country,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'business_electricity_price'
-              THEN m.value
-            END
-          ) AS business_price_usd_per_kwh,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'total_energy_consumption'
-              THEN m.value
-            END
-          ) AS total_energy_consumption_exajoules,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'electricity_generation_solar_share'
-              THEN m.value
-            END
-          ) AS electricity_generation_solar_pct,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'electricity_generation_wind_share'
-              THEN m.value
-            END
-          ) AS electricity_generation_wind_pct,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'electricity_generation_hydro_share'
-              THEN m.value
-            END
-          ) AS electricity_generation_hydro_pct,
-
-          MAX(
-            CASE
-              WHEN m.metric_name = 'electricity_net_imports'
-              THEN m.value
-            END
-          ) AS electricity_net_imports_twh
-
+        SELECT c.name AS country, m.metric_name, m.value, m.unit, m.period
         FROM countries c
-
         LEFT JOIN metrics m
           ON m.country_id = c.id
-
-        GROUP BY c.id, c.name
-
+         AND m.metric_name IN (${Object.keys(fields).map(() => "?").join(", ")})
         ORDER BY c.name
-      `).all();
+      `).bind(...Object.keys(fields)).all();
 
-      return Response.json(
-  {
-    count: result.results.length,
-    countries: result.results
-  },
-  {
-    headers: {
-      "Access-Control-Allow-Origin": "http://localhost:8000"
-    }
-  }
-);
+      const headers = { "Access-Control-Allow-Origin": "http://localhost:8000" };
+      const countries = new Map();
+      for (const row of result.results) {
+        if (!countries.has(row.country)) {
+          countries.set(row.country, {
+            data: { country: row.country, ...Object.fromEntries(Object.values(fields).map(field => [field, null])) },
+            observations: new Map()
+          });
+        }
+        const country = countries.get(row.country);
+        const field = fields[row.metric_name];
+        // Missing observations cannot contradict a known value or become zero.
+        if (!field || row.value == null || row.value === "") continue;
+        const previous = country.observations.get(row.metric_name);
+        if (previous && (previous.value !== row.value || previous.unit !== row.unit || previous.period !== row.period)) {
+          return Response.json({
+            error: "EvidenceConflict",
+            message: "Conflicting screening evidence requires review.",
+            country: row.country,
+            metric: row.metric_name
+          }, { status: 409, headers });
+        }
+        country.observations.set(row.metric_name, row);
+        country.data[field] = row.value;
+      }
 
+      return Response.json({
+        count: countries.size,
+        countries: [...countries.values()].map(country => country.data)
+      }, { headers });
     }
 
     return new Response("Not Found", {
