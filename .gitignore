@@ -27,3 +27,7 @@ dist/
 
 # Local Wrangler development configuration
 wrangler.local.jsonc
+
+# Historical generated publication archives
+datacenter-sites-*.tar.gz
+datacenter-source-*.bundle

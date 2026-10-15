@@ -1,218 +1,53 @@
 # AI Data Center Decision Platform
 
+The academic exercise is complete. This repository supports an evidence-based decision for an initial approximately 25 MW AI data-center facility concept, comparing **Build / Lease / Hybrid**.
 
+Academic completeness does not establish site feasibility or verified hosted operation. Hosted Sites, D1, OpenAI API and Open-Meteo execution have not been verified.
 
-## 1. Project Purpose
+## Academic Base Case
 
+| Parameter | Value | Classification |
+| --- | --- | --- |
+| IT load | 20 MW | assumption |
+| PUE | 1.25 | assumption |
+| Operating hours | 8,760/year | assumption |
+| Facility load | 25 MW | calculation |
+| Annual facility energy | 219 GWh/year | calculation |
+| Country | Canada, provisional country-level academic base case only | design_decision |
 
+No region, city or parcel is selected. Indonesia, Brazil and Canada form the three-country screening shortlist. Jakarta, Brasilia and Ottawa are climate reference locations only. Current evidence does not establish a final preferred Build / Lease / Hybrid option.
 
-This project develops an evidence-based decision platform for the initial design of a 25 MW AI data center.
+## Evidence and Model
 
+The repository includes the evidence model, country screening, website, database schema and seeds, deterministic calculations, authentication and authorization logic, and an evidence-grounded AI Design Adviser. The [energy dataset](data/energy-data.csv) covers 15 countries and 49 fields, including source URLs, retrieval dates and limitations.
 
+The [evidence model](models/evidence_model.md) distinguishes:
 
-The platform will support analysis of three strategic alternatives:
+- **fact:** source-attributed observations, retaining periods, units and limitations.
+- **assumption:** explicitly adopted analytical inputs.
+- **calculation:** results derived deterministically from inputs.
+- **design_decision:** a documented project choice.
+- **unknown:** information not established by available evidence.
 
+Evidence/database records remain the source of truth. Deterministic energy calculations are authoritative; the AI Adviser explains evidence and calculations. Site conditions, grid capacity and reliability, project tariffs, cooling, water, network redundancy, backup requirements, regulatory feasibility and unsupported commercial costs remain unknown.
 
+## Final Academic Deliverables
 
-\- Build
+- [Two-page memo](models/two_page_memo.md)
+- [Five-minute presentation](models/five_minute_presentation.md)
+- [Base case and two academic stress cases](models/academic_scenarios.md)
+- [Build / Lease / Hybrid comparison](models/build_lease_hybrid_comparison.md)
+- [Integrated system architecture](models/system_architecture.md)
+- [Reproducible draft base-design seed](database/seed_base_design.sql)
 
-\- Lease
+## Local Validation and Hosting Boundary
 
-\- Hybrid
+The existing local test suite uses simulated services and does not demonstrate hosted integration:
 
+```sh
+node --test tests/controlled-integration.test.cjs tests/registration-adviser.test.cjs tests/climate-refresh.test.cjs
+```
 
+The [academic scenarios](models/academic_scenarios.md) also document reproducible validation using `calculateEnergy()`.
 
-The system will progressively integrate energy data, engineering assumptions, external evidence, persistent data, user authentication, and an AI adviser.
-
-
-
-## 2. Initial Data Source
-
-
-
-The first dataset is:
-
-
-
-`data/energy-data.csv`
-
-
-
-Current dataset structure:
-
-
-
-\- 15 countries
-
-\- 49 fields
-
-\- Electricity prices
-
-\- Electricity generation mix
-
-\- Primary energy mix
-
-\- Energy production and trade
-
-\- Source URLs
-
-\- Retrieval dates
-
-\- Notes and definitions
-
-
-
-## 3. Initial Decision Dimensions
-
-
-
-The current dataset supports four initial evidence dimensions:
-
-
-
-1\. Energy Cost
-
-2\. Energy Mix
-
-3\. Energy Security and Trade
-
-4\. Evidence Provenance
-
-
-
-These dimensions do not yet constitute the complete data-center location model.
-
-
-
-## 4. Known Missing Evidence
-
-
-
-Additional evidence will be required for:
-
-
-
-\- Grid capacity and reliability
-
-\- Specific site/location
-
-\- Network and fiber connectivity
-
-\- Cooling strategy
-
-\- Water availability and requirements
-
-\- Backup power
-
-\- Land/site conditions
-
-\- Regulatory constraints
-
-\- Engineering assumptions and uncertainties
-
-
-
-Missing information must remain explicitly identified as unknown until supported by evidence.
-
-
-
-## 5. Baseline Data Center Parameters
-
-
-
-Initial design assumptions:
-
-
-
-\- IT Load: 20 MW
-
-\- PUE: 1.25
-
-\- Facility Load: 25 MW
-
-\- Operating Hours: 8,760 hours/year
-
-\- Annual Facility Electricity Requirement: 219 GWh/year
-
-
-
-## 6. Evidence Model
-
-
-
-Information used by the platform must be classified as:
-
-
-
-\- Fact
-
-\- Assumption
-
-\- Calculation
-
-\- Design Decision
-
-\- Unknown
-
-
-
-The AI adviser must not become the source of truth. It must reason over controlled evidence and clearly distinguish evidence from assumptions and calculations.
-
-
-
-## 7. Development Architecture
-
-
-
-The project will evolve through the following architecture:
-
-
-
-Data
-
-→ Evidence Model
-
-→ Website
-
-→ Persistent Database
-
-→ External APIs
-
-→ Authentication and Authorization
-
-→ AI Adviser
-
-
-
-## 8. Current Status
-
-
-
-Completed:
-
-
-
-\- Created project directory
-
-\- Created `data/` directory
-
-\- Copied `energy-data.csv`
-
-\- Verified 15 countries
-
-\- Verified 49 fields
-
-\- Created project README
-
-
-
-Next:
-
-
-
-\- Define the initial evidence model
-
-\- Define the three-country screening method
-
-\- Create the first website structure
-
+In [hosting.json](.openai/hosting.json), `project_id` is the publication placeholder `REPLACE_WITH_YOUR_SITES_PROJECT_ID`. Replace it with your own Sites project identifier only when separately configuring hosting. The placeholder is not a working project identifier; it is not needed for local academic validation. Repository seeds do not establish population of hosted D1.
